@@ -1,0 +1,158 @@
+/* ═══════════════════════════════════════════════════
+   COLLAB LANCE — DARK OBSIDIAN & ELECTRIC PURPLE THEME
+   Global Design System & Full-Width Layout Architecture
+   ═══════════════════════════════════════════════════ */
+
+/* CSS Design Tokens */
+:root {
+  --bg-primary:      #090A0F;
+  --bg-secondary:    #0D0E15;
+  --surface-1:       #13141C;
+  --surface-2:       #1A1B26;
+  --surface-3:       #1E1F2E;
+  --border-subtle:   #2D2D3F;
+  --border-glow:     rgba(124, 58, 237, 0.35);
+
+  --accent:          #7C3AED;
+  --accent-bright:   #8B5CF6;
+  --accent-hover:    #A855F7;
+  --accent-glow:     rgba(124, 58, 237, 0.25);
+  --accent-subtle:   rgba(124, 58, 237, 0.12);
+
+  --text-primary:    #F9FAFB;
+  --text-secondary:  #E5E7EB;
+  --text-muted:      #9CA3AF;
+  --text-faint:      #6B7280;
+
+  --success:         #10B981;
+  --success-bg:      rgba(16, 185, 129, 0.12);
+  --warning:         #F59E0B;
+  --warning-bg:      rgba(245, 158, 11, 0.12);
+  --danger:          #EF4444;
+  --danger-bg:       rgba(239, 68, 68, 0.12);
+  --info:            #3B82F6;
+  --info-bg:         rgba(59, 130, 246, 0.12);
+
+  --radius-sm:       8px;
+  --radius-md:       12px;
+  --radius-lg:       16px;
+  --radius-xl:       20px;
+  --radius-full:     9999px;
+
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:       0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:       0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow:     0 0 24px rgba(124,58,237,0.2);
+
+  --transition:      all 0.2s cubic-bezier(0.4,0,0.2,1);
+  --transition-slow: all 0.35s cubic-bezier(0.4,0,0.2,1);
+
+  --font:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --sidebar-w:       240px;
+  --sidebar-collapsed: 72px;
+  --header-h:        62px;
+}
+
+/* ── Base Reset & Viewport Lock ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* ── Global Ambient Background ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  height: 60vh;
+  background: radial-gradient(ellipse at center, rgba(124,58,237,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-1); }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Base Elements ── */
+a { text-decoration: none; color: inherit; }
+button { font-family: var(--font); cursor: pointer; }
+input, textarea, select { font-family: var(--font); }
+img { display: block; max-width: 100%; }
+
+/* ── Focus Ring ── */
+:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Keyframe Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Utility classes ── */
+.page-fade   { animation: fadeUp 0.4s ease both; }
+.page-fade-2 { animation: fadeUp 0.4s ease 0.05s both; }
+.page-fade-3 { animation: fadeUp 0.4s ease 0.10s both; }
+.page-fade-4 { animation: fadeUp 0.4s ease 0.15s both; }
+
+/* ── Override Bootstrap remnants & Ensure Full Width Containers ── */
+.container, .container-fluid {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.card { background: transparent; border: none; }
+.btn  { font-family: var(--font); }
+.badge { font-family: var(--font); }
+.form-control, .form-select { font-family: var(--font); }

@@ -1,0 +1,60 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:3000"
+              - "http://localhost:*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/api/auth, /api/auth/**, /api/admin, /api/admin/**, /api/users, /api/users/**
+
+        - id: project-service
+          uri: lb://PROJECT-SERVICE
+          predicates:
+            - Path=/api/projects, /api/projects/**, /api/profiles, /api/profiles/**, /api/applications, /api/applications/**, /api/categories, /api/categories/**, /api/reports, /api/reports/**
+
+        - id: collaboration-service
+          uri: lb://COLLABORATION-SERVICE
+          predicates:
+            - Path=/api/tasks, /api/tasks/**, /api/chat, /api/chat/**, /api/files, /api/files/**
+
+        - id: collaboration-uploads
+          uri: lb://COLLABORATION-SERVICE
+          order: -1
+          predicates:
+            - Path=/uploads/chat/**
+
+        - id: auth-uploads
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/uploads/**
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
