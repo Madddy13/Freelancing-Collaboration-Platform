@@ -7,6 +7,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
+import org.springframework.web.client.RestTemplate;
+import java.util.*;
+
 @Service
 public class ProjectService {
 
@@ -15,6 +18,7 @@ public class ProjectService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRoleRequirementRepository roleRequirementRepository;
+    private final RestTemplate restTemplate;
 
     public ProjectService(ProjectRepository projectRepository,
                           ApplicationRepository applicationRepository,
@@ -26,6 +30,7 @@ public class ProjectService {
         this.teamRepository = teamRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.roleRequirementRepository = roleRequirementRepository;
+        this.restTemplate = new RestTemplate();
     }
 
     // Creates both INDIVIDUAL and TEAM projects
@@ -115,29 +120,44 @@ public class ProjectService {
         return applicationRepository.save(application);
     }
 
+    private Map<String, String> fetchUserDetails(Long userId) {
+        Map<String, String> details = new HashMap<>();
+        if (userId == null) return details;
+        try {
+            String url = "http://localhost:8081/api/users/profile/" + userId;
+            Map<?, ?> user = restTemplate.getForObject(url, Map.class);
+            if (user != null) {
+                String fName = user.get("firstName") != null ? user.get("firstName").toString() : "";
+                String lName = user.get("lastName") != null ? user.get("lastName").toString() : "";
+                String email = user.get("email") != null ? user.get("email").toString() : "";
+                String name = user.get("name") != null ? user.get("name").toString() : "";
+
+                String fullName = (fName + " " + lName).trim();
+                if (fullName.isEmpty() && !name.isEmpty()) {
+                    fullName = name;
+                }
+                if (fullName.isEmpty() && !email.isEmpty()) {
+                    fullName = email.split("@")[0];
+                }
+                details.put("fullName", fullName.isEmpty() ? "Freelancer #" + userId : fullName);
+                details.put("email", email.isEmpty() ? "freelancer" + userId + "@platform.com" : email);
+                return details;
+            }
+        } catch (Exception ignored) {
+            // Fallback if auth-service is temporarily offline or disconnected
+        }
+        details.put("fullName", "Freelancer #" + userId);
+        details.put("email", "freelancer" + userId + "@platform.com");
+        return details;
+    }
+
     public List<Application> getApplicationsByProject(Long projectId) {
         List<Application> apps = applicationRepository.findByProjectId(projectId);
         for (Application app : apps) {
             if (app.getFreelancerId() != null) {
-                try {
-                    List<Object[]> userDetails = teamRepository.findUserDetailsByUserId(app.getFreelancerId());
-                    if (userDetails != null && !userDetails.isEmpty()) {
-                        Object[] row = userDetails.get(0);
-                        String fName = row[0] != null ? row[0].toString() : "";
-                        String lName = row[1] != null ? row[1].toString() : "";
-                        String email = row[2] != null ? row[2].toString() : "";
-                        
-                        String fullName = (fName + " " + lName).trim();
-                        app.setFreelancerName(!fullName.isEmpty() ? fullName : email.split("@")[0]);
-                        app.setFreelancerEmail(email);
-                    } else {
-                        app.setFreelancerName("Freelancer #" + app.getFreelancerId());
-                        app.setFreelancerEmail("freelancer" + app.getFreelancerId() + "@platform.com");
-                    }
-                } catch (Exception e) {
-                    app.setFreelancerName("Freelancer #" + app.getFreelancerId());
-                    app.setFreelancerEmail("freelancer" + app.getFreelancerId() + "@platform.com");
-                }
+                Map<String, String> details = fetchUserDetails(app.getFreelancerId());
+                app.setFreelancerName(details.get("fullName"));
+                app.setFreelancerEmail(details.get("email"));
             }
         }
         return apps;
@@ -192,26 +212,10 @@ public class ProjectService {
             member.setUserId(app.getFreelancerId());
             member.setRole(roleName);
 
-            // Fetch Real User Details from MySQL
-            try {
-                List<Object[]> userDetails = teamRepository.findUserDetailsByUserId(app.getFreelancerId());
-                if (userDetails != null && !userDetails.isEmpty()) {
-                    Object[] row = userDetails.get(0);
-                    String fName = row[0] != null ? row[0].toString() : "";
-                    String lName = row[1] != null ? row[1].toString() : "";
-                    String email = row[2] != null ? row[2].toString() : "";
-                    
-                    String fullName = (fName + " " + lName).trim();
-                    member.setUserName(!fullName.isEmpty() ? fullName : email.split("@")[0]);
-                    member.setUserEmail(email);
-                } else {
-                  member.setUserName("Freelancer #" + app.getFreelancerId());
-                  member.setUserEmail("freelancer" + app.getFreelancerId() + "@platform.com");
-                }
-            } catch (Exception e) {
-                member.setUserName("Freelancer #" + app.getFreelancerId());
-                member.setUserEmail("freelancer" + app.getFreelancerId() + "@platform.com");
-            }
+            // Fetch Real User Details from Auth Service via REST
+            Map<String, String> details = fetchUserDetails(app.getFreelancerId());
+            member.setUserName(details.get("fullName"));
+            member.setUserEmail(details.get("email"));
 
             teamMemberRepository.save(member);
         }
