@@ -17,8 +17,11 @@ License
 
 Name Role	Responsibilities
 Madhav Saxena	👑 Team Lead	Project Architecture, Gateway & Service Routing, Core Features
+
 Anshita Aseri	💻 Team Member	Microservice Development & Frontend Integration
+
 Aniruddha Raut	💻 Team Member	Backend API & Database Management
+
 Aditi Deo	💻 Team Member	UI/UX & Frontend Components
 
 
