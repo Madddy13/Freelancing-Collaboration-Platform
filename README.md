@@ -16,6 +16,7 @@ License
 👥 Team Members
 
 Name Role	Responsibilities
+
 Madhav Saxena	👑 Team Lead	Project Architecture, Gateway & Service Routing, Core Features
 
 Anshita Aseri	💻 Team Member	Microservice Development & Frontend Integration
